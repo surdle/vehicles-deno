@@ -10,14 +10,20 @@
 
 <body>
     <main>
+        <hgroup>
+            <h1>Form example</h1>
+            <p>Fill out the form below to get started</p>
+        </hgroup>
         <form>
-            <label for="make">Make</label>
-            <select id="make" name="make" required>
-                <option value="">Select a make</option>
-            </select>
             <label for="year">Year</label>
-            <select id="year" name="year" required disabled>
+            <select id="year" name="year" required>
+                <option value="">Select a year</option>
             </select>
+            <label for="make">Make</label>
+            <select id="make" name="make" required disabled>
+
+            </select>
+
             <label for="model">Model</label>
             <select id="model" name="model" required disabled>
             </select>
@@ -29,68 +35,68 @@
 
     <script>
         // fill the first dropdown with a list of makes
-        const makeDropdown = document.querySelector('#make');
         const yearDropdown = document.querySelector('#year');
+        const makeDropdown = document.querySelector('#make');
         const modelDropdown = document.querySelector('#model');
+        const submitButton = document.querySelector('#submit');
 
 
 
 
-        fetch('https://vehicles-deno.deno.dev/api/makes')
+        fetch('https://vehicles-deno.deno.dev/api/years')
             .then(response => response.json())
-            .then(({ uniqueMakes }) => {
-                uniqueMakes.forEach(make => {
+            .then(({ uniqueYears }) => {
+                uniqueYears.forEach(year => {
                     const option = document.createElement('option');
-                    option.value = make;
-                    option.textContent = make;
-                    makeDropdown.appendChild(option);
+                    option.value = year;
+                    option.textContent = year;
+                    yearDropdown.appendChild(option);
 
                 });
             });
 
-        // when the user selects a make, fill the year dropdown with a list of years
 
-        makeDropdown.addEventListener('change', (event) => {
-            
-            const yearDropdown = document.querySelector('#year');
-           const submitButton = document.querySelector('#submit');
-           const make = event.target.value;
+        yearDropdown.addEventListener('change', (event) => {
 
-            yearDropdown.disabled = true;
-            yearDropdown.innerHTML = '';
+
+            const year = event.target.value;
+
+            makeDropdown.disabled = true;
+            makeDropdown.innerHTML = '';
             modelDropdown.innerHTML = '';
             modelDropdown.disabled = true;
             submitButton.disabled = true;
 
 
-            fetch(`https://vehicles-deno.deno.dev/api/years?make=${make}`)
+            fetch(`https://vehicles-deno.deno.dev/api/makes?year=${year}`)
                 .then(response => response.json())
-                .then(({ uniqueYears }) => {
+                .then(({ uniqueMakes }) => {
 
-                    if (uniqueYears === undefined) {
+                    if (uniqueMakes === undefined) {
+                        makeDropdown.disabled = true;
+                        makeDropdown.innerHTML = '';
+                        submitButton.disabled = true;
                         return;
                     }
 
-                    yearDropdown.innerHTML = '<option value="">Select a year</option>';
-                    modelDropdown.innerHTML = '';
-                    uniqueYears.forEach(year => {
+                    makeDropdown.innerHTML = '<option value="">Select a make</option>'
+                    uniqueMakes.forEach(make => {
                         const option = document.createElement('option');
-                        option.value = year;
-                        option.textContent = year;
-                        yearDropdown.appendChild(option);
+                        option.value = make;
+                        option.textContent = make;
+                        makeDropdown.appendChild(option);
                     });
 
-                    yearDropdown.disabled = false;
+                    makeDropdown.disabled = false;
                 });
         });
 
 
-        // when the user selects a year, fill the model dropdown with a list of models
 
-        yearDropdown.addEventListener('change', (event) => {
+        makeDropdown.addEventListener('change', (event) => {
             const modelDropdown = document.querySelector('#model');
-            const make = makeDropdown.value;
-            const year = event.target.value;
+            const make = event.target.value;
+            const year = yearDropdown.value;
 
             modelDropdown.disabled = true;
             modelDropdown.innerHTML = ''
@@ -98,7 +104,7 @@
             const submitButton = document.querySelector('#submit');
             submitButton.disabled = true;
 
-            fetch(`https://vehicles-deno.deno.dev/api/models?make=${make}&year=${year}`)
+            fetch(`https://vehicles-deno.deno.dev/api/models?year=${year}&make=${make}`)
                 .then(response => response.json())
                 .then(({ uniqueModels }) => {
 
@@ -109,7 +115,7 @@
                         return;
                     }
 
-                    
+
                     modelDropdown.innerHTML = '<option value="">Select a model</option>'
                     uniqueModels.forEach(model => {
                         const option = document.createElement('option');
@@ -122,14 +128,18 @@
                 });
         });
 
-        // when the user selects a model, enable the submit button
 
         modelDropdown.addEventListener('change', (event) => {
             const submitButton = document.querySelector('#submit');
+
+            if (event.target.value === '') {
+                submitButton.disabled = true;
+                return;
+            }
+
             submitButton.disabled = false;
         });
 
-        // when the user clicks the submit button, display the selected make, year, and model 
 
         const form = document.querySelector('form');
 

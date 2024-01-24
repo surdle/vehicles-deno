@@ -30,40 +30,43 @@ app.get("/api/", async (c) => {
   return c.json({ vehicles });
 });
 
-app.get("/api/makes", async (c) => {
-  const vehicles = await getVehicles();
-
-  const makes = vehicles.map((vehicle) => vehicle.make);
-
-  const uniqueMakes = [...new Set(makes)];
-
-  return c.json({ uniqueMakes });
-});
 
 app.get("/api/years", async (c) => {
-  if (c.req.query("make") === undefined) {
-    return c.json({ error: "Please provide a make" });
-  }
-
   const vehicles = await getVehicles();
 
-  const makes = vehicles.map((vehicle) => vehicle.make);
-
-  const uniqueMakes = [...new Set(makes)];
-
-  const make = c.req.query("make");
-
-  if (!uniqueMakes.includes(make)) {
-    return c.json({ error: "Please provide a valid make" });
-  }
-
-  const filteredVehicles = vehicles.filter((vehicle) => vehicle.make === make);
-
-  const years = filteredVehicles.map((vehicle) => vehicle.year);
+  const years = vehicles.map((vehicle) => vehicle.year);
 
   const uniqueYears = [...new Set(years)];
 
   return c.json({ uniqueYears });
+}
+);
+
+app.get("/api/makes", async (c) => {
+  if (c.req.query("year") === undefined) {
+    return c.json({ error: "Please provide a year" });
+  }
+
+  const vehicles = await getVehicles();
+
+  const years = vehicles.map((vehicle) => vehicle.year);
+
+  const uniqueYears = [...new Set(years)];
+
+  const year = parseInt(c.req.query("year"));
+
+  if (!uniqueYears.includes(year)) {
+
+    return c.json({ error: "Please provide a valid year" });
+  }
+
+  const filteredVehicles = vehicles.filter((vehicle) => vehicle.year === year);
+
+  const makes = filteredVehicles.map((vehicle) => vehicle.make);
+
+  const uniqueMakes = [...new Set(makes)];
+
+  return c.json({ uniqueMakes });
 });
 
 app.get("/api/models", async (c) => {
@@ -112,10 +115,8 @@ app.get("/api/models", async (c) => {
 
 
 app.get('/', async (c) => {
-    
   const data = await Deno.readTextFile('index.html')
   return c.html(data)
-
 })
 
 Deno.serve(app.fetch);
