@@ -36,7 +36,7 @@
 
 
 
-        fetch('http://localhost:8000/api/makes')
+        fetch('https://vehicles-deno.deno.dev/api/makes')
             .then(response => response.json())
             .then(({ uniqueMakes }) => {
                 uniqueMakes.forEach(make => {
@@ -63,7 +63,7 @@
             submitButton.disabled = true;
 
 
-            fetch(`http://localhost:8000/api/years?make=${make}`)
+            fetch(`https://vehicles-deno.deno.dev/api/years?make=${make}`)
                 .then(response => response.json())
                 .then(({ uniqueYears }) => {
 
@@ -98,7 +98,7 @@
             const submitButton = document.querySelector('#submit');
             submitButton.disabled = true;
 
-            fetch(`http://localhost:8000/api/models?make=${make}&year=${year}`)
+            fetch(`https://vehicles-deno.deno.dev/api/models?make=${make}&year=${year}`)
                 .then(response => response.json())
                 .then(({ uniqueModels }) => {
 
