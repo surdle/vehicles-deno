@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.classless.min.css" />
+</head>
+
+<body>
+    <main>
+        <form>
+            <label for="make">Make</label>
+            <select id="make" name="make" required>
+                <option value="">Select a make</option>
+            </select>
+            <label for="year">Year</label>
+            <select id="year" name="year" required disabled>
+            </select>
+            <label for="model">Model</label>
+            <select id="model" name="model" required disabled>
+            </select>
+
+
+            <button id="submit" type="submit" disabled>Submit</button>
+        </form>
+    </main>
+
+    <script>
+        // fill the first dropdown with a list of makes
+        const makeDropdown = document.querySelector('#make');
+        const yearDropdown = document.querySelector('#year');
+        const modelDropdown = document.querySelector('#model');
+
+
+
+
+        fetch('http://localhost:8000/api/makes')
+            .then(response => response.json())
+            .then(({ uniqueMakes }) => {
+                uniqueMakes.forEach(make => {
+                    const option = document.createElement('option');
+                    option.value = make;
+                    option.textContent = make;
+                    makeDropdown.appendChild(option);
+
+                });
+            });
+
+        // when the user selects a make, fill the year dropdown with a list of years
+
+        makeDropdown.addEventListener('change', (event) => {
+            
+            const yearDropdown = document.querySelector('#year');
+           const submitButton = document.querySelector('#submit');
+           const make = event.target.value;
+
+            yearDropdown.disabled = true;
+            yearDropdown.innerHTML = '';
+            modelDropdown.innerHTML = '';
+            modelDropdown.disabled = true;
+            submitButton.disabled = true;
+
+
+            fetch(`http://localhost:8000/api/years?make=${make}`)
+                .then(response => response.json())
+                .then(({ uniqueYears }) => {
+
+                    if (uniqueYears === undefined) {
+                        return;
+                    }
+
+                    yearDropdown.innerHTML = '<option value="">Select a year</option>';
+                    modelDropdown.innerHTML = '';
+                    uniqueYears.forEach(year => {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = year;
+                        yearDropdown.appendChild(option);
+                    });
+
+                    yearDropdown.disabled = false;
+                });
+        });
+
+
+        // when the user selects a year, fill the model dropdown with a list of models
+
+        yearDropdown.addEventListener('change', (event) => {
+            const modelDropdown = document.querySelector('#model');
+            const make = makeDropdown.value;
+            const year = event.target.value;
+
+            modelDropdown.disabled = true;
+            modelDropdown.innerHTML = ''
+
+            const submitButton = document.querySelector('#submit');
+            submitButton.disabled = true;
+
+            fetch(`http://localhost:8000/api/models?make=${make}&year=${year}`)
+                .then(response => response.json())
+                .then(({ uniqueModels }) => {
+
+                    if (uniqueModels === undefined) {
+                        modelDropdown.disabled = true;
+                        modelDropdown.innerHTML = '';
+                        submitButton.disabled = true;
+                        return;
+                    }
+
+                    
+                    modelDropdown.innerHTML = '<option value="">Select a model</option>'
+                    uniqueModels.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model;
+                        option.textContent = model;
+                        modelDropdown.appendChild(option);
+                    });
+                    modelDropdown.disabled = false
+
+                });
+        });
+
+        // when the user selects a model, enable the submit button
+
+        modelDropdown.addEventListener('change', (event) => {
+            const submitButton = document.querySelector('#submit');
+            submitButton.disabled = false;
+        });
+
+        // when the user clicks the submit button, display the selected make, year, and model 
+
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const make = makeDropdown.value;
+            const year = yearDropdown.value;
+            const model = modelDropdown.value;
+
+            alert(`Make: ${make}\nYear: ${year}\nModel: ${model}`);
+        });
+
+    </script>
+</body>
+
+</html>
