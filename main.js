@@ -110,4 +110,12 @@ app.get("/api/models", async (c) => {
   return c.json({ uniqueModels });
 });
 
+
+app.get('/', async (c) => {
+    
+  const data = await Deno.readTextFile('index.html')
+  return c.html(data)
+
+})
+
 Deno.serve(app.fetch);
